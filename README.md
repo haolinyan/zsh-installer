@@ -1,0 +1,106 @@
+# zsh-installer
+
+一个用于在Debian和Alibaba Cloud Linux系统上自动安装和配置zsh、oh-my-zsh及其插件的脚本工具。
+
+## 功能特点
+
+- 安装zsh并设置为默认shell
+- 安装oh-my-zsh框架
+- 安装并配置zsh-autosuggestions插件
+- 安装并配置zsh-syntax-highlighting插件
+- 配置zsh主题为cloud
+
+## 支持的系统
+
+- Debian系统（检测/etc/debian_version文件）
+- Alibaba Cloud Linux系统（检测系统名称）
+
+## 安装要求
+
+- 具有root权限或sudo权限
+- 已连接互联网
+- 系统已安装curl和git
+
+## 使用方法
+
+### 基本安装
+
+1. 下载脚本
+
+   ```bash
+   curl -O https://raw.githubusercontent.com/[your-username]/zsh-installer/main/zsh-installer.sh
+   ```
+
+2. 设置执行权限
+
+   ```bash
+   chmod +x zsh-installer.sh
+   ```
+
+3. 运行脚本
+
+   ```bash
+   ./zsh-installer.sh
+   ```
+
+4. 安装完成后，注销并重新登录，或者直接运行以下命令启动zsh：
+
+   ```bash
+   zsh
+   ```
+
+### 脚本执行流程
+
+1. **权限检查**：验证是否具有足够的权限执行安装操作
+2. **系统检查**：确认当前系统是Debian或Alibaba Cloud Linux
+3. **zsh安装**：如果zsh未安装，则使用系统包管理器安装
+4. **设置默认shell**：将zsh设置为当前用户的默认shell（在CI环境中会跳过此步骤）
+5. **git安装**：如果git未安装，则安装git（oh-my-zsh依赖）
+6. **oh-my-zsh安装**：如果oh-my-zsh未安装，则安装oh-my-zsh框架
+7. **插件安装**：安装zsh-autosuggestions和zsh-syntax-highlighting插件
+8. **主题配置**：配置zsh使用cloud主题
+
+## GitHub Actions CI测试
+
+本项目包含完整的GitHub Actions CI配置，可以在每次代码push或创建pull request时自动测试脚本功能。测试在Ubuntu（基于Debian）环境中运行，验证脚本是否能正确安装和配置所有组件。
+
+CI配置文件位于 `.github/workflows/test.yml` <mcfile name="test.yml" path="/Users/yanhaolin/Desktop/zsh-installer/.github/workflows/test.yml"></mcfile>，测试流程包括：
+
+1. **代码检出**：从GitHub仓库检出最新代码
+2. **设置权限**：为脚本文件添加执行权限
+3. **安装依赖**：安装curl和git等必要工具
+4. **执行测试**：运行脚本并验证所有组件的安装状态
+5. **结果验证**：检查以下内容是否正确安装和配置：
+   - zsh shell
+   - oh-my-zsh框架
+   - zsh-autosuggestions插件
+   - zsh-syntax-highlighting插件
+   - .zshrc配置文件（主题设置和插件启用）
+
+测试配置会捕获脚本输出，检查执行退出码，并提供详细的测试结果日志，确保脚本在Debian环境中的稳定性和可靠性。
+
+## 注意事项
+
+- 脚本在执行过程中遇到错误会自动退出，请根据错误信息排查问题
+- 在CI环境中，脚本会自动跳过设置默认shell的操作，以避免权限问题
+- 脚本会自动备份现有的.zshrc文件，备份文件名为 `.zshrc.backup.时间戳`
+- 如果安装过程中断或失败，可以重新运行脚本继续安装
+- 安装完成后，建议注销并重新登录以应用默认shell的更改
+
+## 常见问题
+
+### Q: 脚本提示"需要root权限或sudo命令"怎么办？
+A: 请使用具有sudo权限的用户运行脚本，或者切换到root用户执行。
+
+### Q: 脚本提示"不支持该系统"怎么办？
+A: 本脚本仅支持Debian和Alibaba Cloud Linux系统，如果您使用的是其他系统，需要手动安装和配置zsh。
+
+### Q: 安装完成后，zsh主题没有生效怎么办？
+A: 请检查 `.zshrc` 文件中的 `ZSH_THEME` 设置是否为 `'cloud'`，如果不是，请手动修改并运行 `source ~/.zshrc` 应用更改。
+
+### Q: 插件没有生效怎么办？
+A: 请检查 `.zshrc` 文件中的 `plugins` 设置是否包含 `zsh-autosuggestions` 和 `zsh-syntax-highlighting`，如果没有，请手动添加并运行 `source ~/.zshrc` 应用更改。
+
+## License
+
+MIT License
