@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 在Debian和Alibaba Cloud Linux系统上安装zsh、oh-my-zsh及其插件的脚本
+# 在Ubuntu和Alibaba Cloud Linux系统上安装zsh、oh-my-zsh及其插件的脚本
 # 支持apt、yum和dnf包管理器
 # 自动安装oh-my-zsh、zsh-autosuggestions插件并配置主题为cloud
 # 这是一个跨平台终端配置方案的一部分
@@ -31,11 +31,11 @@ check_permissions() {
     fi
 }
 
-# 检查当前系统是否为Debian或Alibaba Cloud Linux
-check_debian() {
-    # 检查是否有Debian版本文件
+# 检查当前系统是否为Ubuntu或Alibaba Cloud Linux
+check_ubuntu() {
+    # 检查是否有Debian版本文件（Ubuntu系统会有这个文件）
     if [ -f /etc/debian_version ]; then
-        echo "检测到Debian系统，继续安装..."
+        echo "检测到Ubuntu系统，继续安装..."
         return 0
     fi
     
@@ -50,7 +50,7 @@ check_debian() {
     if [ -z "$SYSTEM_NAME" ]; then
         SYSTEM_NAME="未知系统"
     fi
-    echo "错误：此脚本专为Debian或Alibaba Cloud Linux系统设计，当前系统为 $SYSTEM_NAME，不支持该系统。"
+    echo "错误：此脚本专为Ubuntu或Alibaba Cloud Linux系统设计，当前系统为 $SYSTEM_NAME，不支持该系统。"
     exit 1
 }
 
@@ -252,7 +252,7 @@ main() {
     echo "===== zsh安装脚本 ======"
     
     check_permissions
-    check_debian
+    check_ubuntu
     
     if ! check_zsh_installed; then
         install_zsh

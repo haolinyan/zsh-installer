@@ -1,4 +1,4 @@
-name: 测试zsh安装脚本
+name: Zsh Installer CI
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  test-on-debian:
-    runs-on: ubuntu-latest  # GitHub Actions提供的Ubuntu环境（基于Debian）
+  test-on-ubuntu:
+    runs-on: ubuntu-latest
     steps:
       - name: 检出代码
         uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
       - name: 安装依赖项（curl、git）
         run: sudo apt-get update && sudo apt-get install -y curl git
         
-      - name: 在Debian环境中测试脚本
+      - name: 在Ubuntu环境中测试脚本
         run: |
           echo "开始测试zsh-installer.sh脚本..."
           # 由于GitHub Actions环境的限制，我们需要修改脚本的某些行为以适合CI环境
