@@ -1,0 +1,102 @@
+name: Zsh Installer CN CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test-on-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+        
+      - name: 设置执行权限
+        run: chmod +x zsh-installer-cn.sh
+        
+      - name: 安装依赖项（curl、git）
+        run: sudo apt-get update && sudo apt-get install -y curl git
+        
+      - name: 在Ubuntu环境中测试国内优化版本脚本
+        run: |
+          echo "开始测试zsh-installer-cn.sh脚本..."
+          
+          # 设置环境变量以非交互方式运行
+          export NON_INTERACTIVE=true
+          export CI=true
+          
+          # 运行脚本并捕获输出
+          echo "正在运行国内优化版本安装脚本..."
+          if ! bash zsh-installer-cn.sh; then
+            echo "错误：脚本执行失败"
+            exit 1
+          fi
+          
+          # 检查zsh是否安装成功
+          if ! command -v zsh &> /dev/null; then
+            echo "错误：zsh安装失败"
+            exit 1
+          else
+            echo "✓ zsh安装成功，版本：$(zsh --version)"
+          fi
+          
+          # 检查oh-my-zsh是否安装成功
+          if [ ! -d "$HOME/.oh-my-zsh" ]; then
+            echo "错误：oh-my-zsh安装失败"
+            exit 1
+          else
+            echo "✓ oh-my-zsh安装成功"
+          fi
+          
+          # 检查zsh-autosuggestions插件是否安装成功
+          ZSH_AUTOSUGGESTIONS_DIR="$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+          if [ ! -d "$ZSH_AUTOSUGGESTIONS_DIR" ]; then
+            echo "错误：zsh-autosuggestions插件安装失败"
+            exit 1
+          else
+            echo "✓ zsh-autosuggestions插件安装成功"
+          fi
+          
+          # 检查zsh-syntax-highlighting插件是否安装成功
+          ZSH_SYNTAX_HIGHLIGHTING_DIR="$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+          if [ ! -d "$ZSH_SYNTAX_HIGHLIGHTING_DIR" ]; then
+            echo "错误：zsh-syntax-highlighting插件安装失败"
+            exit 1
+          else
+            echo "✓ zsh-syntax-highlighting插件安装成功"
+          fi
+          
+          # 检查.zshrc配置是否正确
+          if [ ! -f "$HOME/.zshrc" ]; then
+            echo "错误：.zshrc文件不存在"
+            exit 1
+          else
+            echo "✓ .zshrc文件已创建"
+            
+            # 检查主题是否设置为cloud
+            if grep -q "ZSH_THEME='cloud'" "$HOME/.zshrc"; then
+              echo "✓ zsh主题已成功设置为cloud"
+            else
+              echo "⚠ 警告：zsh主题未设置为cloud"
+            fi
+            
+            # 检查插件是否启用
+            if grep -q "zsh-autosuggestions" "$HOME/.zshrc" && grep -q "zsh-syntax-highlighting" "$HOME/.zshrc"; then
+              echo "✓ 插件已成功启用"
+            else
+              echo "⚠ 警告：部分插件未在.zshrc中启用"
+            fi
+          fi
+          
+          # 检查Node.js是否安装成功
+          if ! command -v node &> /dev/null; then
+            echo "⚠ 警告：Node.js未安装或安装失败"
+          else
+            echo "✓ Node.js安装成功，版本：$(node --version)"
+            echo "✓ npm版本：$(npm --version)"
+          fi
+          
+          echo "✅ 测试完成：所有组件均已成功安装！"
