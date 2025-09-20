@@ -2,6 +2,10 @@
 
 一个用于在Ubuntu和Alibaba Cloud Linux系统上自动安装和配置zsh、oh-my-zsh及其插件的脚本工具。
 
+## 国内优化版本
+
+针对国内用户网络环境，我们还提供了使用国内镜像源的优化版本 `zsh-installer-cn.sh`，可以显著提高安装速度和成功率。
+
 ## 功能特点
 
 - 安装zsh并设置为默认shell
@@ -50,6 +54,34 @@
    zsh
    ```
 
+### 国内优化版本安装
+
+针对国内用户网络环境，我们提供了使用国内镜像源的优化版本，可以显著提高安装速度和成功率：
+
+1. 下载国内优化版本脚本
+
+   ```bash
+   curl -O https://raw.githubusercontent.com/[your-username]/zsh-installer/main/zsh-installer-cn.sh
+   ```
+
+2. 设置执行权限
+
+   ```bash
+   chmod +x zsh-installer-cn.sh
+   ```
+
+3. 运行脚本
+
+   ```bash
+   ./zsh-installer-cn.sh
+   ```
+
+4. 安装完成后，注销并重新登录，或者直接运行以下命令启动zsh：
+
+   ```bash
+   zsh
+   ```
+
 ### 脚本执行流程
 
 1. **权限检查**：验证是否具有足够的权限执行安装操作
@@ -61,6 +93,17 @@
 7. **oh-my-zsh安装**：如果oh-my-zsh未安装，则安装oh-my-zsh框架
 8. **插件安装**：安装zsh-autosuggestions和zsh-syntax-highlighting插件
 9. **主题配置**：配置zsh使用cloud主题
+
+### 国内优化版本特性
+
+国内优化版本 (`zsh-installer-cn.sh`) 在保持功能一致性的基础上，针对国内网络环境进行了以下优化：
+
+1. **oh-my-zsh安装源**：使用Gitee镜像替代GitHub源
+2. **插件下载源**：zsh-syntax-highlighting和zsh-autosuggestions插件均使用Gitee镜像
+3. **Node.js安装源**：使用腾讯云镜像源替代官方源
+4. **其他依赖**：系统包管理器使用国内镜像（需用户自行配置）
+
+注意：国内优化版本假设系统的包管理器已配置为使用国内镜像源。如果没有配置，建议先配置APT或YUM的国内镜像源，以获得最佳的下载速度。
 
 ## GitHub Actions CI测试
 
@@ -102,6 +145,11 @@ A: 请检查 `.zshrc` 文件中的 `ZSH_THEME` 设置是否为 `'cloud'`，如�
 
 ### Q: 插件没有生效怎么办？
 A: 请检查 `.zshrc` 文件中的 `plugins` 设置是否包含 `zsh-autosuggestions` 和 `zsh-syntax-highlighting`，如果没有，请手动添加并运行 `source ~/.zshrc` 应用更改。
+
+### Q: 国内优化版本安装速度仍然很慢怎么办？
+A: 国内优化版本主要优化了GitHub相关资源的访问速度。如果系统包管理器的安装速度仍然很慢，建议配置APT或YUM使用国内镜像源：
+   - Ubuntu: 配置 `/etc/apt/sources.list` 使用阿里云、清华等镜像站
+   - Alibaba Cloud Linux: 系统默认已使用阿里云镜像源
 
 ## License
 
