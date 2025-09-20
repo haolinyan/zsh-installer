@@ -9,8 +9,8 @@ set -e  # 遇到错误时退出脚本
 
 # 检测是否在CI环境中运行
 is_ci_environment() {
-    if [[ -n "$CI" || -n "$GITHUB_ACTIONS" || -n "$CONTINUOUS_INTEGRATION" ]]; then
-        echo "检测到CI环境"
+    if [[ -n "$CI" || -n "$GITHUB_ACTIONS" || -n "$CONTINUOUS_INTEGRATION" || -n "$NON_INTERACTIVE" ]]; then
+        echo "检测到CI环境或非交互模式"
         return 0
     else
         return 1
@@ -80,7 +80,13 @@ check_ohmyzsh_installed() {
 install_ohmyzsh() {
     echo "安装oh-my-zsh..."
     # 使用官方安装脚本，添加非交互式选项
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "--unattended"
+    if is_ci_environment; then
+        # 在CI环境中使用--unattended参数
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    else
+        # 在非CI环境中正常安装
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    fi
     
     if [ -d "$HOME/.oh-my-zsh" ]; then
         echo "oh-my-zsh安装成功！"
