@@ -9,6 +9,7 @@
 - 安装并配置zsh-autosuggestions插件
 - 安装并配置zsh-syntax-highlighting插件
 - 配置zsh主题为cloud
+- 安装最新的Node.js (LTS版本)
 
 ## 支持的系统
 
@@ -56,9 +57,10 @@
 3. **zsh安装**：如果zsh未安装，则使用系统包管理器安装
 4. **设置默认shell**：将zsh设置为当前用户的默认shell（在CI环境中会跳过此步骤）
 5. **git安装**：如果git未安装，则安装git（oh-my-zsh依赖）
-6. **oh-my-zsh安装**：如果oh-my-zsh未安装，则安装oh-my-zsh框架
-7. **插件安装**：安装zsh-autosuggestions和zsh-syntax-highlighting插件
-8. **主题配置**：配置zsh使用cloud主题
+6. **Node.js安装**：如果Node.js未安装，则安装最新的Node.js LTS版本
+7. **oh-my-zsh安装**：如果oh-my-zsh未安装，则安装oh-my-zsh框架
+8. **插件安装**：安装zsh-autosuggestions和zsh-syntax-highlighting插件
+9. **主题配置**：配置zsh使用cloud主题
 
 ## GitHub Actions CI测试
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 在Ubuntu和Alibaba Cloud Linux系统上安装zsh、oh-my-zsh及其插件的脚本
+# 在Ubuntu和Alibaba Cloud Linux系统上安装zsh、oh-my-zsh、其插件和最新Node.js的脚本
 # 支持apt、yum和dnf包管理器
 # 自动安装oh-my-zsh、zsh-autosuggestions插件并配置主题为cloud
 # 这是一个跨平台终端配置方案的一部分
@@ -247,6 +247,59 @@ set_zsh_default() {
     fi
 }
 
+# 检查Node.js是否已安装
+check_nodejs_installed() {
+    if command -v node &> /dev/null; then
+        echo "Node.js已安装，版本：$(node --version)"
+        return 0
+    else
+        echo "Node.js未安装，将进行安装..."
+        return 1
+    fi
+}
+
+# 安装最新的Node.js
+install_nodejs() {
+    echo "安装最新的Node.js..."
+    
+    # 使用NodeSource安装最新的LTS版本
+    # 根据包管理器类型安装Node.js
+    if [[ "$INSTALL_CMD" == *"apt"* ]]; then
+        # Ubuntu/Debian系统
+        echo "添加NodeSource PPA..."
+        $SUDO apt-get update
+        $SUDO apt-get install -y ca-certificates curl gnupg
+        $SUDO mkdir -p /etc/apt/keyrings
+        curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | $SUDO gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+        
+        # 安装最新的LTS版本
+        NODE_MAJOR=20
+        echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | $SUDO tee /etc/apt/sources.list.d/nodesource.list
+        
+        $SUDO apt-get update
+        $SUDO apt-get install -y nodejs
+    elif [[ "$INSTALL_CMD" == *"yum"* || "$INSTALL_CMD" == *"dnf"* ]]; then
+        # CentOS/RHEL/Alibaba Cloud Linux系统
+        echo "添加NodeSource仓库..."
+        NODE_MAJOR=20
+        curl -fsSL https://rpm.nodesource.com/setup_$NODE_MAJOR.x | $SUDO bash -
+        $INSTALL_CMD nodejs
+    else
+        echo "错误：不支持的包管理器，无法安装Node.js"
+        return 1
+    fi
+    
+    # 验证安装
+    if command -v node &> /dev/null; then
+        echo "Node.js安装成功！版本：$(node --version)"
+        echo "npm版本：$(npm --version)"
+        return 0
+    else
+        echo "错误：Node.js安装失败"
+        return 1
+    fi
+}
+
 # 主函数
 main() {
     echo "===== zsh安装脚本 ======"
@@ -265,6 +318,12 @@ main() {
         echo "安装git（oh-my-zsh依赖）..."
         detect_package_manager
         eval $INSTALL_CMD git
+    fi
+    
+    # 安装最新的Node.js
+    if ! check_nodejs_installed; then
+        detect_package_manager  # 确保已设置INSTALL_CMD
+        install_nodejs
     fi
     
     # 安装oh-my-zsh

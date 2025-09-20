@@ -90,11 +90,20 @@ jobs:
             fi
             
             # 检查插件是否启用
-            if grep -q "zsh-autosuggestions" "$HOME/.zshrc" && grep -q "zsh-syntax-highlighting" "$HOME/.zshrc"; then
-              echo "插件已成功启用"
-            else
-              echo "警告：部分插件未在.zshrc中启用"
-            fi
+          if grep -q "zsh-autosuggestions" "$HOME/.zshrc" && grep -q "zsh-syntax-highlighting" "$HOME/.zshrc"; then
+            echo "插件已成功启用"
+          else
+            echo "警告：部分插件未在.zshrc中启用"
           fi
-          
-          echo "测试完成：所有组件均已成功安装！"
+        fi
+        
+        # 检查Node.js是否安装成功
+        if ! command -v node &> /dev/null; then
+          echo "错误：Node.js安装失败"
+          exit 1
+        else
+          echo "Node.js安装成功，版本：$(node --version)"
+          echo "npm版本：$(npm --version)"
+        fi
+        
+        echo "测试完成：所有组件均已成功安装！"
