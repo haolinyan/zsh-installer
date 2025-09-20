@@ -1,6 +1,6 @@
 # zsh-installer
 
-一个用于在Debian和Alibaba Cloud Linux系统上自动安装和配置zsh、oh-my-zsh及其插件的脚本工具。
+一个用于在Ubuntu和Alibaba Cloud Linux系统上自动安装和配置zsh、oh-my-zsh及其插件的脚本工具。
 
 ## 功能特点
 
@@ -9,10 +9,11 @@
 - 安装并配置zsh-autosuggestions插件
 - 安装并配置zsh-syntax-highlighting插件
 - 配置zsh主题为cloud
+- 安装最新的Node.js (LTS版本)
 
 ## 支持的系统
 
-- Debian系统（检测/etc/debian_version文件）
+- Ubuntu系统（检测/etc/debian_version文件）
 - Alibaba Cloud Linux系统（检测系统名称）
 
 ## 安装要求
@@ -52,17 +53,18 @@
 ### 脚本执行流程
 
 1. **权限检查**：验证是否具有足够的权限执行安装操作
-2. **系统检查**：确认当前系统是Debian或Alibaba Cloud Linux
+2. **系统检查**：确认当前系统是Ubuntu或Alibaba Cloud Linux
 3. **zsh安装**：如果zsh未安装，则使用系统包管理器安装
 4. **设置默认shell**：将zsh设置为当前用户的默认shell（在CI环境中会跳过此步骤）
 5. **git安装**：如果git未安装，则安装git（oh-my-zsh依赖）
-6. **oh-my-zsh安装**：如果oh-my-zsh未安装，则安装oh-my-zsh框架
-7. **插件安装**：安装zsh-autosuggestions和zsh-syntax-highlighting插件
-8. **主题配置**：配置zsh使用cloud主题
+6. **Node.js安装**：如果Node.js未安装，则安装最新的Node.js LTS版本
+7. **oh-my-zsh安装**：如果oh-my-zsh未安装，则安装oh-my-zsh框架
+8. **插件安装**：安装zsh-autosuggestions和zsh-syntax-highlighting插件
+9. **主题配置**：配置zsh使用cloud主题
 
 ## GitHub Actions CI测试
 
-本项目包含完整的GitHub Actions CI配置，可以在每次代码push或创建pull request时自动测试脚本功能。测试在Ubuntu（基于Debian）环境中运行，验证脚本是否能正确安装和配置所有组件。
+本项目包含完整的GitHub Actions CI配置，可以在每次代码push或创建pull request时自动测试脚本功能。测试在Ubuntu环境中运行，验证脚本是否能正确安装和配置所有组件。
 
 CI配置文件位于 `.github/workflows/test.yml` <mcfile name="test.yml" path="/Users/yanhaolin/Desktop/zsh-installer/.github/workflows/test.yml"></mcfile>，测试流程包括：
 
@@ -77,7 +79,7 @@ CI配置文件位于 `.github/workflows/test.yml` <mcfile name="test.yml" path="
    - zsh-syntax-highlighting插件
    - .zshrc配置文件（主题设置和插件启用）
 
-测试配置会捕获脚本输出，检查执行退出码，并提供详细的测试结果日志，确保脚本在Debian环境中的稳定性和可靠性。
+测试配置会捕获脚本输出，检查执行退出码，并提供详细的测试结果日志，确保脚本在Ubuntu环境中的稳定性和可靠性。
 
 ## 注意事项
 
@@ -93,7 +95,7 @@ CI配置文件位于 `.github/workflows/test.yml` <mcfile name="test.yml" path="
 A: 请使用具有sudo权限的用户运行脚本，或者切换到root用户执行。
 
 ### Q: 脚本提示"不支持该系统"怎么办？
-A: 本脚本仅支持Debian和Alibaba Cloud Linux系统，如果您使用的是其他系统，需要手动安装和配置zsh。
+A: 本脚本仅支持Ubuntu和Alibaba Cloud Linux系统，如果您使用的是其他系统，需要手动安装和配置zsh。
 
 ### Q: 安装完成后，zsh主题没有生效怎么办？
 A: 请检查 `.zshrc` 文件中的 `ZSH_THEME` 设置是否为 `'cloud'`，如果不是，请手动修改并运行 `source ~/.zshrc` 应用更改。

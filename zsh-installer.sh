@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 在Debian和Alibaba Cloud Linux系统上安装zsh、oh-my-zsh及其插件的脚本
+# 在Ubuntu和Alibaba Cloud Linux系统上安装zsh、oh-my-zsh、其插件和最新Node.js的脚本
 # 支持apt、yum和dnf包管理器
 # 自动安装oh-my-zsh、zsh-autosuggestions插件并配置主题为cloud
 # 这是一个跨平台终端配置方案的一部分
@@ -9,8 +9,8 @@ set -e  # 遇到错误时退出脚本
 
 # 检测是否在CI环境中运行
 is_ci_environment() {
-    if [[ -n "$CI" || -n "$GITHUB_ACTIONS" || -n "$CONTINUOUS_INTEGRATION" ]]; then
-        echo "检测到CI环境"
+    if [[ -n "$CI" || -n "$GITHUB_ACTIONS" || -n "$CONTINUOUS_INTEGRATION" || -n "$NON_INTERACTIVE" ]]; then
+        echo "检测到CI环境或非交互模式"
         return 0
     else
         return 1
@@ -31,11 +31,11 @@ check_permissions() {
     fi
 }
 
-# 检查当前系统是否为Debian或Alibaba Cloud Linux
-check_debian() {
-    # 检查是否有Debian版本文件
+# 检查当前系统是否为Ubuntu或Alibaba Cloud Linux
+check_ubuntu() {
+    # 检查是否有Debian版本文件（Ubuntu系统会有这个文件）
     if [ -f /etc/debian_version ]; then
-        echo "检测到Debian系统，继续安装..."
+        echo "检测到Ubuntu系统，继续安装..."
         return 0
     fi
     
@@ -50,7 +50,7 @@ check_debian() {
     if [ -z "$SYSTEM_NAME" ]; then
         SYSTEM_NAME="未知系统"
     fi
-    echo "错误：此脚本专为Debian或Alibaba Cloud Linux系统设计，当前系统为 $SYSTEM_NAME，不支持该系统。"
+    echo "错误：此脚本专为Ubuntu或Alibaba Cloud Linux系统设计，当前系统为 $SYSTEM_NAME，不支持该系统。"
     exit 1
 }
 
@@ -80,7 +80,13 @@ check_ohmyzsh_installed() {
 install_ohmyzsh() {
     echo "安装oh-my-zsh..."
     # 使用官方安装脚本，添加非交互式选项
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "--unattended"
+    if is_ci_environment; then
+        # 在CI环境中使用--unattended参数
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    else
+        # 在非CI环境中正常安装
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    fi
     
     if [ -d "$HOME/.oh-my-zsh" ]; then
         echo "oh-my-zsh安装成功！"
@@ -247,12 +253,65 @@ set_zsh_default() {
     fi
 }
 
+# 检查Node.js是否已安装
+check_nodejs_installed() {
+    if command -v node &> /dev/null; then
+        echo "Node.js已安装，版本：$(node --version)"
+        return 0
+    else
+        echo "Node.js未安装，将进行安装..."
+        return 1
+    fi
+}
+
+# 安装最新的Node.js
+install_nodejs() {
+    echo "安装最新的Node.js..."
+    
+    # 使用NodeSource安装最新的LTS版本
+    # 根据包管理器类型安装Node.js
+    if [[ "$INSTALL_CMD" == *"apt"* ]]; then
+        # Ubuntu/Debian系统
+        echo "添加NodeSource PPA..."
+        $SUDO apt-get update
+        $SUDO apt-get install -y ca-certificates curl gnupg
+        $SUDO mkdir -p /etc/apt/keyrings
+        curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | $SUDO gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+        
+        # 安装最新的LTS版本
+        NODE_MAJOR=20
+        echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | $SUDO tee /etc/apt/sources.list.d/nodesource.list
+        
+        $SUDO apt-get update
+        $SUDO apt-get install -y nodejs
+    elif [[ "$INSTALL_CMD" == *"yum"* || "$INSTALL_CMD" == *"dnf"* ]]; then
+        # CentOS/RHEL/Alibaba Cloud Linux系统
+        echo "添加NodeSource仓库..."
+        NODE_MAJOR=20
+        curl -fsSL https://rpm.nodesource.com/setup_$NODE_MAJOR.x | $SUDO bash -
+        $INSTALL_CMD nodejs
+    else
+        echo "错误：不支持的包管理器，无法安装Node.js"
+        return 1
+    fi
+    
+    # 验证安装
+    if command -v node &> /dev/null; then
+        echo "Node.js安装成功！版本：$(node --version)"
+        echo "npm版本：$(npm --version)"
+        return 0
+    else
+        echo "错误：Node.js安装失败"
+        return 1
+    fi
+}
+
 # 主函数
 main() {
     echo "===== zsh安装脚本 ======"
     
     check_permissions
-    check_debian
+    check_ubuntu
     
     if ! check_zsh_installed; then
         install_zsh
@@ -265,6 +324,12 @@ main() {
         echo "安装git（oh-my-zsh依赖）..."
         detect_package_manager
         eval $INSTALL_CMD git
+    fi
+    
+    # 安装最新的Node.js
+    if ! check_nodejs_installed; then
+        detect_package_manager  # 确保已设置INSTALL_CMD
+        install_nodejs
     fi
     
     # 安装oh-my-zsh

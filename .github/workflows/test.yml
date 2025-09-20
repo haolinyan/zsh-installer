@@ -1,14 +1,15 @@
-name: 测试zsh安装脚本
+name: Zsh Installer CI
 
 on:
   push:
-    branches: [ main ]  # 或其他您想要触发测试的分支
+    branches: [ main ]
   pull_request:
     branches: [ main ]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  test-on-debian:
-    runs-on: ubuntu-latest  # GitHub Actions提供的Ubuntu环境（基于Debian）
+  test-on-ubuntu:
+    runs-on: ubuntu-latest
     steps:
       - name: 检出代码
         uses: actions/checkout@v3
@@ -19,25 +20,18 @@ jobs:
       - name: 安装依赖项（curl、git）
         run: sudo apt-get update && sudo apt-get install -y curl git
         
-      - name: 在Debian环境中测试脚本
+      - name: 在Ubuntu环境中测试脚本
         run: |
           echo "开始测试zsh-installer.sh脚本..."
-          # 由于GitHub Actions环境的限制，我们需要修改脚本的某些行为以适合CI环境
-          # 1. 添加非交互式标志
-          # 2. 捕获脚本输出以便检查
-          # 3. 在CI环境中，我们不能真正改变默认shell或要求用户重新登录
           
-          # 运行脚本，捕获输出，并检查是否有错误
-          OUTPUT=$(bash -x zsh-installer.sh 2>&1)
-          EXIT_CODE=$?
+          # 设置环境变量以非交互方式运行
+          export NON_INTERACTIVE=true
+          export CI=true
           
-          # 打印脚本输出
-          echo "脚本输出："
-          echo "$OUTPUT"
-          
-          # 检查脚本是否成功执行
-          if [ $EXIT_CODE -ne 0 ]; then
-            echo "错误：脚本执行失败，退出码：$EXIT_CODE"
+          # 运行脚本并捕获输出
+          echo "正在运行安装脚本..."
+          if ! bash zsh-installer.sh; then
+            echo "错误：脚本执行失败"
             exit 1
           fi
           
@@ -46,7 +40,7 @@ jobs:
             echo "错误：zsh安装失败"
             exit 1
           else
-            echo "zsh安装成功，版本：$(zsh --version)"
+            echo "✓ zsh安装成功，版本：$(zsh --version)"
           fi
           
           # 检查oh-my-zsh是否安装成功
@@ -54,7 +48,7 @@ jobs:
             echo "错误：oh-my-zsh安装失败"
             exit 1
           else
-            echo "oh-my-zsh安装成功"
+            echo "✓ oh-my-zsh安装成功"
           fi
           
           # 检查zsh-autosuggestions插件是否安装成功
@@ -63,7 +57,7 @@ jobs:
             echo "错误：zsh-autosuggestions插件安装失败"
             exit 1
           else
-            echo "zsh-autosuggestions插件安装成功"
+            echo "✓ zsh-autosuggestions插件安装成功"
           fi
           
           # 检查zsh-syntax-highlighting插件是否安装成功
@@ -72,7 +66,7 @@ jobs:
             echo "错误：zsh-syntax-highlighting插件安装失败"
             exit 1
           else
-            echo "zsh-syntax-highlighting插件安装成功"
+            echo "✓ zsh-syntax-highlighting插件安装成功"
           fi
           
           # 检查.zshrc配置是否正确
@@ -80,21 +74,29 @@ jobs:
             echo "错误：.zshrc文件不存在"
             exit 1
           else
-            echo ".zshrc文件已创建"
+            echo "✓ .zshrc文件已创建"
             
             # 检查主题是否设置为cloud
             if grep -q "ZSH_THEME='cloud'" "$HOME/.zshrc"; then
-              echo "zsh主题已成功设置为cloud"
+              echo "✓ zsh主题已成功设置为cloud"
             else
-              echo "警告：zsh主题未设置为cloud"
+              echo "⚠ 警告：zsh主题未设置为cloud"
             fi
             
             # 检查插件是否启用
             if grep -q "zsh-autosuggestions" "$HOME/.zshrc" && grep -q "zsh-syntax-highlighting" "$HOME/.zshrc"; then
-              echo "插件已成功启用"
+              echo "✓ 插件已成功启用"
             else
-              echo "警告：部分插件未在.zshrc中启用"
+              echo "⚠ 警告：部分插件未在.zshrc中启用"
             fi
           fi
           
-          echo "测试完成：所有组件均已成功安装！"
+          # 检查Node.js是否安装成功
+          if ! command -v node &> /dev/null; then
+            echo "⚠ 警告：Node.js未安装或安装失败"
+          else
+            echo "✓ Node.js安装成功，版本：$(node --version)"
+            echo "✓ npm版本：$(npm --version)"
+          fi
+          
+          echo "✅ 测试完成：所有组件均已成功安装！"
