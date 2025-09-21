@@ -79,13 +79,13 @@ check_ohmyzsh_installed() {
 # 安装oh-my-zsh（使用国内镜像）
 install_ohmyzsh() {
     echo "安装oh-my-zsh（使用国内镜像）..."
-    # 使用国内镜像安装脚本，添加非交互式选项
+    # 使用国内镜像安装脚本，设置REMOTE变量指向Gitee镜像以避免从GitHub克隆
     if is_ci_environment; then
         # 在CI环境中使用--unattended参数
-        sh -c "$(curl -fsSL https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh)" "" --unattended
+        REMOTE=https://gitee.com/mirrors/oh-my-zsh.git sh -c "$(curl -fsSL https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh)" "" --unattended
     else
         # 在非CI环境中正常安装（使用国内镜像）
-        sh -c "$(curl -fsSL https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh)"
+        REMOTE=https://gitee.com/mirrors/oh-my-zsh.git sh -c "$(curl -fsSL https://gitee.com/mirrors/oh-my-zsh/raw/master/tools/install.sh)"
     fi
     
     if [ -d "$HOME/.oh-my-zsh" ]; then
